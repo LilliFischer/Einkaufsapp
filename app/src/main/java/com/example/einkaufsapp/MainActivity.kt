@@ -1,47 +1,41 @@
 package com.example.einkaufsapp
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.einkaufsapp.ui.theme.EinkaufsappTheme
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var inputArtikel: EditText
+    private lateinit var buttonHinzufuegen: Button
+    private lateinit var listViewArtikel: ListView
+
+    private val artikelListe = ArrayList<String>()
+    private lateinit var adapter: ArrayAdapter<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            EinkaufsappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+        setContentView(R.layout.activity_main)
+
+        inputArtikel = findViewById(R.id.inputArtikel)
+        buttonHinzufuegen = findViewById(R.id.buttonHinzufuegen)
+        listViewArtikel = findViewById(R.id.listViewArtikel)
+
+        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, artikelListe)
+        listViewArtikel.adapter = adapter
+
+        buttonHinzufuegen.setOnClickListener {
+            val artikel = inputArtikel.text.toString()
+            if (artikel.isNotBlank()) {
+                artikelListe.add(artikel)
+                adapter.notifyDataSetChanged()
+                inputArtikel.text.clear()
             }
         }
-    }
-}
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    EinkaufsappTheme {
-        Greeting("Android")
+        listViewArtikel.setOnItemClickListener { _, _, position, _ ->
+            artikelListe.removeAt(position)
+            adapter.notifyDataSetChanged()
+        }
     }
 }
