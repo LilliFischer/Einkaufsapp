@@ -4,12 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.einkaufsapp.ui.theme.EinkaufsappTheme
 
@@ -19,11 +22,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             EinkaufsappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    Einkaufsliste()
                 }
             }
         }
@@ -31,17 +34,61 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun Einkaufsliste() {
+    //Zustand für die Liste der Artikel
+    var einkaufsliste by remember { mutableStateOf(listOf<String>()) }
+
+    //Zustand für das Eingabefeld
+    var eingabeText by remember { mutableStateOf(TextFieldValue("")) }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextField(
+            value = eingabeText,
+            onValueChange = { eingabeText = it },
+            label = { Text("Neuer Artikel") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                val neuerArtikel = eingabeText.text.trim()
+                if (neuerArtikel.isNotEmpty()) {
+                    einkaufsliste = einkaufsliste + neuerArtikel
+                    eingabeText = TextFieldValue("") //Eingabe zurücksetzen
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Hinzufügen")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Einkaufsliste:", style = MaterialTheme.typography.titleMedium)
+
+        LazyColumn {
+            items(einkaufsliste) { artikel ->
+                Text(
+                    text = artikel,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .clickable {
+                            einkaufsliste = einkaufsliste - artikel // Entfernen beim Klicken
+                        }
+                )
+            }
+        }
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun EinkaufslistePreview() {
     EinkaufsappTheme {
-        Greeting("Android")
+        Einkaufsliste()
     }
 }
